@@ -1,116 +1,131 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="UTF-8">
     <title>Projector Leaderboard - Silo Breaker</title>
     <style>
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: #020617;
-        color: #f8fafc;
-        text-align: center;
-        padding: 40px;
-        margin: 0;
-      }
-      h1 {
-        font-size: 42px;
-        color: #38bdf8;
-        margin-bottom: 5px;
-      }
-      .subtitle {
-        font-size: 20px;
-        color: #94a3b8;
-        margin-bottom: 30px;
-      }
-      .leaderboard-box {
-        max-width: 800px;
-        margin: 0 auto;
-        background: #0f172a;
-        padding: 25px;
-        border-radius: 16px;
-        border: 2px solid #1e293b;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 24px;
-      }
-      th,
-      td {
-        padding: 18px;
-        text-align: left;
-        border-bottom: 1px solid #1e293b;
-      }
-      th {
-        color: #64748b;
-        font-size: 18px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-      tr:nth-child(1) td {
-        color: #facc15;
-        font-weight: bold;
-        background: rgba(250, 204, 21, 0.08);
-      }
-      .time-badge {
-        font-family: monospace;
-        color: #4ade80;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>🏆 LIVE LEADERBOARD: Silo Breaker Challenge</h1>
-    <div class="subtitle">
-      Scan the QR code on the presentation slide to play and secure the bonus!
-    </div>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8fafc; color: #0f172a; text-align: center; padding: 30px; margin: 0; }
+        h1 { font-size: 40px; color: #0284c7; margin-bottom: 5px; }
+        .subtitle { font-size: 18px; color: #475569; margin-bottom: 25px; }
+        .leaderboard-box { max-width: 900px; margin: 0 auto; background: #ffffff; padding: 25px; border-radius: 16px; border: 2px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { color: #64748b; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* Barres de progression pour fond clair */
+        .bar-container {
+            position: relative;
+            background: #f1f5f9;
+            border-radius: 8px;
+            height: 38px;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            border: 1px solid #e2e8f0;
+        }
+        .progress-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            border-radius: 8px;
+            transition: width 0.6s ease-in-out;
+            opacity: 0.85;
+        }
+        .bar-1 { background: linear-gradient(90deg, #facc15, #fde047); box-shadow: 0 0 12px rgba(250, 204, 21, 0.4); opacity: 1; }
+        .bar-2 { background: linear-gradient(90deg, #38bdf8, #7dd3fc); }
+        .bar-3 { background: linear-gradient(90deg, #4ade80, #86efac); }
+        .bar-other { background: linear-gradient(90deg, #cbd5e1, #e2e8f0); }
 
+        .bar-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0 15px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #0f172a;
+        }
+        .time-text { font-family: monospace; font-size: 19px; color: #0369a1; }
+    </style>
+</head>
+<body>
+    <h1>🏆 LIVE LEADERBOARD: Silo Breaker Challenge</h1>
+    <div class="subtitle">Classement en direct et progression de la course !</div>
+    
     <div class="leaderboard-box">
-      <table>
-        <thead>
-          <tr>
-            <th style="width: 15%">Rank</th>
-            <th style="width: 55%">Player Name</th>
-            <th style="width: 30%">Clear Time</th>
-          </tr>
-        </thead>
-        <tbody id="leaderboard-body">
-          <tr>
-            <td colspan="3" style="text-align: center; color: #64748b">
-              Waiting for players to finish...
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 12%;">Rang</th>
+                    <th style="width: 28%;">Joueur</th>
+                    <th style="width: 60%;">Progression de la course</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                <tr><td colspan="3" style="text-align:center; color: #64748b;">En attente des premiers joueurs...</td></tr>
+            </tbody>
+        </table>
     </div>
 
     <script>
-      const WEB_APP_URL =
-        "https://script.google.com/macros/s/AKfycbxXHJNcc8iwJdOA9ZtvWzufRgKUlEGn8lDq3LodfLymuwgtqKGNjXxx1zWzVlmQBNeeOA/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxXHJNcc8iwJdOA9ZtvWzufRgKUlEGn8lDq3LodfLymuwgtqKGNjXxx1zWzVlmQBNeeOA/exec";
 
-      function fetchLeaderboard() {
-        fetch(`${WEB_APP_URL}?action=leaderboard`)
-          .then((res) => res.json())
-          .then((data) => {
-            let tbody = document.getElementById("leaderboard-body");
-            tbody.innerHTML = "";
-            if (!data || data.length === 0) {
-              tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: #64748b;">No finishes yet. Ready... Set... Go!</td></tr>`;
-              return;
-            }
-            data.forEach((row, index) => {
-              let tr = document.createElement("tr");
-              let rankDisplay = index === 0 ? "👑 #1" : `#${index + 1}`;
-              tr.innerHTML = `<td>${rankDisplay}</td><td>${row.name}</td><td class="time-badge">${row.time}s</td>`;
-              tbody.appendChild(tr);
-            });
-          })
-          .catch((err) => console.error("Error fetching leaderboard", err));
-      }
+        function fetchLeaderboard() {
+            fetch(`${WEB_APP_URL}?action=leaderboard`)
+                .then(res => res.json())
+                .then(data => {
+                    let tbody = document.getElementById("leaderboard-body");
+                    tbody.innerHTML = "";
+                    
+                    if (!data || data.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: #64748b;">Aucun score pour l'instant. Que le meilleur gagne !</td></tr>`;
+                        return;
+                    }
 
-      // Poll the Google Sheet backend every 2 seconds
-      setInterval(fetchLeaderboard, 2000);
-      fetchLeaderboard();
+                    // Filtrer et trier par temps croissant (le plus rapide en premier)
+                    let validData = data.filter(row => row.name && !isNaN(parseFloat(row.time)));
+                    validData.sort((a, b) => parseFloat(a.time) - parseFloat(b.time));
+
+                    if (validData.length === 0) return;
+
+                    let bestTime = parseFloat(validData[0].time);
+
+                    validData.forEach((row, index) => {
+                        let tr = document.createElement("tr");
+                        let rankDisplay = index === 0 ? "👑 #1" : `#${index + 1}`;
+                        let timeVal = parseFloat(row.time);
+
+                        // Calcul de la taille de la barre par rapport au meilleur score
+                        let percentage = Math.max(15, Math.min(100, Math.round((bestTime / timeVal) * 100)));
+                        if (index === 0) percentage = 100;
+
+                        let barClass = index === 0 ? "bar-1" : (index === 1 ? "bar-2" : (index === 2 ? "bar-3" : "bar-other"));
+
+                        tr.innerHTML = `
+                            <td style="font-weight: bold; font-size: 20px; color: ${index === 0 ? '#ca8a04' : '#0f172a'}">${rankDisplay}</td>
+                            <td style="font-weight: bold; font-size: 20px; color: #0f172a;">${row.name}</td>
+                            <td>
+                                <div class="bar-container">
+                                    <div class="progress-bar ${barClass}" style="width: ${percentage}%;"></div>
+                                    <div class="bar-content">
+                                        <span>${row.name}</span>
+                                        <span class="time-text">${timeVal.toFixed(2)}s</span>
+                                    </div>
+                                </div>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(err => console.error("Erreur de chargement du classement", err));
+        }
+
+        setInterval(fetchLeaderboard, 2000);
+        fetchLeaderboard();
     </script>
-  </body>
+</body>
 </html>
