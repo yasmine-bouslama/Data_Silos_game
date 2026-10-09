@@ -5,47 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Silo Breaker - Live Challenge</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f8fafc; text-align: center; padding: 20px; margin: 0; }
-        .card { background: #1e293b; max-width: 500px; margin: 40px auto; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        input { width: 85%; padding: 12px; margin: 15px 0; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 16px; text-align: center; }
-        button { background: #3b82f6; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: background 0.2s; }
-        button:hover { background: #2563eb; }
-        .option-btn { background: #334155; margin-top: 10px; border: 1px solid #475569; text-align: left; padding: 14px; }
-        .option-btn:hover { background: #475569; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #ffffff; color: #1e293b; text-align: center; padding: 20px; margin: 0; }
+        .card { background: #f8fafc; max-width: 500px; margin: 40px auto; padding: 30px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        input { width: 85%; padding: 12px; margin: 15px 0; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-size: 16px; text-align: center; }
+        button { background: #0284c7; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: background 0.2s; }
+        button:hover { background: #0369a1; }
+        .option-btn { background: #ffffff; color: #1e293b; margin-top: 10px; border: 2px solid #e2e8f0; text-align: left; padding: 14px; font-weight: 600; width: 100%; border-radius: 8px; cursor: pointer; }
+        .option-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
         .hidden { display: none; }
-        #timer { font-size: 24px; font-weight: bold; color: #38bdf8; margin: 5px 0 15px 0; }
-        .question-text { font-size: 17px; margin-bottom: 20px; text-align: left; line-height: 1.4; }
+        .question-text { font-size: 18px; margin-bottom: 20px; text-align: left; line-height: 1.4; font-weight: 600; color: #0f172a; }
+        #feedback { font-weight: bold; margin-top: 15px; font-size: 16px; }
     </style>
 </head>
 <body>
     <div class="card" id="login-screen">
         <h2>🚀 Silo Breaker Challenge</h2>
-        <p>Enter your name to join the race and win the professor's bonus!</p>
+        <p>Enter your name to join the live game session!</p>
         <input type="text" id="playerName" placeholder="Your Name or Student ID" required><br>
-        <button onclick="startGame()">Start Challenge</button>
+        <button onclick="joinGame()">Join Game</button>
+    </div>
+
+    <div class="card hidden" id="waiting-screen">
+        <h2>⏳ Waiting for the Host...</h2>
+        <p>Look up at the big projector screen. The game will start shortly!</p>
+        <p style="font-weight: bold; color: #0284c7;" id="welcome-msg"></p>
     </div>
 
     <div class="card hidden" id="game-screen">
-        <div style="display: flex; justify-content: space-between; align-items: center; color: #94a3b8; font-size: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; color: #64748b; font-size: 14px; margin-bottom: 15px;">
             <span id="question-progress">Question 1/6</span>
-            <span id="timer">0.0s</span>
+            <span id="score-display" style="font-weight: bold; color: #0284c7;">Score: 0 pts</span>
         </div>
         <div class="question-text" id="question-title">Loading question...</div>
         <div id="options-container" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <div id="feedback"></div>
     </div>
 
     <div class="card hidden" id="success-screen">
-        <h2>🎉 Finished!</h2>
-        <p>Your Total Time: <span id="finalTime" style="color: #4ade80; font-size: 24px; font-weight: bold;"></span> seconds</p>
-        <p style="color: #94a3b8; font-size: 14px;">Look up at the main projector screen to see if you secured 1st place!</p>
+        <h2>🎉 Challenge Completed!</h2>
+        <p>Your Total Score: <span id="finalScore" style="color: #16a34a; font-size: 26px; font-weight: bold;"></span> points</p>
+        <p style="color: #64748b; font-size: 14px;">Check the projector screen to see the final leaderboard standings!</p>
     </div>
 
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxXHJNcc8iwJdOA9ZtvWzufRgKUlEGn8lDq3LodfLymuwgtqKGNjXxx1zWzVlmQBNeeOA/exec";
         
         let playerName = "";
-        let startTime, timerInterval;
-        let currentQuestionIndex = 0;
+        let totalScore = 0;
+        let lastKnownQuestionIndex = -1;
+        let answeredCurrentQuestion = false;
+        let questionStartTime = 0;
 
         const questions = [
             {
@@ -80,36 +89,58 @@
             }
         ];
 
-        function startGame() {
+        function joinGame() {
             playerName = document.getElementById("playerName").value.trim();
             if(!playerName) { alert("Please enter your name!"); return; }
             
             document.getElementById("login-screen").classList.add("hidden");
-            document.getElementById("game-screen").classList.remove("hidden");
-            
-            startTime = Date.now();
-            timerInterval = setInterval(() => {
-                let elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-                document.getElementById("timer").innerText = elapsed + "s";
-            }, 100);
+            document.getElementById("waiting-screen").classList.remove("hidden");
+            document.getElementById("welcome-msg").innerText = `Welcome, ${playerName}!`;
 
-            loadQuestion();
+            setInterval(syncGameState, 1500);
         }
 
-        function loadQuestion() {
-            if (currentQuestionIndex >= questions.length) {
+        function syncGameState() {
+            fetch(`${WEB_APP_URL}?action=getGameState`)
+                .then(res => res.json())
+                .then(state => {
+                    let adminQuestionIndex = parseInt(state.currentQuestion) || 0;
+                    let gameStatus = state.status;
+
+                    if (gameStatus === 'finished') {
+                        endGame();
+                        return;
+                    }
+
+                    if (gameStatus === 'playing') {
+                        document.getElementById("waiting-screen").classList.add("hidden");
+                        document.getElementById("success-screen").classList.add("hidden");
+                        document.getElementById("game-screen").classList.remove("hidden");
+
+                        if (adminQuestionIndex !== lastKnownQuestionIndex) {
+                            lastKnownQuestionIndex = adminQuestionIndex;
+                            answeredCurrentQuestion = false;
+                            loadQuestion(adminQuestionIndex);
+                        }
+                    }
+                })
+                .catch(err => console.log("Sync error"));
+        }
+
+        function loadQuestion(index) {
+            if (index >= questions.length) {
                 endGame();
                 return;
             }
 
-            let q = questions[currentQuestionIndex];
-            document.getElementById("question-progress").innerText = `Question ${currentQuestionIndex + 1}/${questions.length}`;
+            let q = questions[index];
+            document.getElementById("question-progress").innerText = `Question ${index + 1}/${questions.length}`;
             document.getElementById("question-title").innerText = q.question;
+            document.getElementById("feedback").innerText = "";
 
             let container = document.getElementById("options-container");
             container.innerHTML = "";
 
-            // Shuffle options so it's a real challenge
             let shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
 
             shuffledOptions.forEach(optText => {
@@ -119,36 +150,49 @@
                 btn.onclick = () => checkAnswer(optText, q.correct, btn);
                 container.appendChild(btn);
             });
+
+            questionStartTime = Date.now();
         }
 
         function checkAnswer(selected, correct, btn) {
+            if (answeredCurrentQuestion) return;
+            answeredCurrentQuestion = true;
+
+            let elapsedSeconds = (Date.now() - questionStartTime) / 1000;
+            let feedback = document.getElementById("feedback");
+            let buttons = document.querySelectorAll(".option-btn");
+            
+            buttons.forEach(b => b.onclick = null);
+
             if (selected === correct) {
+                let speedBonus = Math.max(10, Math.round(100 - (elapsedSeconds * 5)));
+                totalScore += speedBonus;
+
                 btn.style.background = "#22c55e";
+                btn.style.color = "#ffffff";
                 btn.style.borderColor = "#22c55e";
-                setTimeout(() => {
-                    currentQuestionIndex++;
-                    loadQuestion();
-                }, 300);
+                feedback.style.color = "#16a34a";
+                feedback.innerText = `Correct! +${speedBonus} points`;
             } else {
                 btn.style.background = "#ef4444";
+                btn.style.color = "#ffffff";
                 btn.style.borderColor = "#ef4444";
-                setTimeout(() => {
-                    btn.style.background = "#334155";
-                    btn.style.borderColor = "#475569";
-                }, 400);
-            }
-        }
+                
+                buttons.forEach(b => {
+                    if (b.innerText === correct) {
+                        b.style.background = "#22c55e";
+                        b.style.color = "#ffffff";
+                    }
+                });
 
-        function endGame() {
-            clearInterval(timerInterval);
-            let totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            document.getElementById("finalTime").innerText = totalTime + "s";
-            document.getElementById("game-screen").classList.add("hidden");
-            document.getElementById("success-screen").classList.remove("hidden");
-            
-            // Send score to Google Sheets backend
-            fetch(`${WEB_APP_URL}?action=submit&name=${encodeURIComponent(playerName)}&time=${totalTime}`)
-                .catch(err => console.log("Score logged"));
+                feedback.style.color = "#dc2626";
+                feedback.innerText = `Incorrect! 0 points. Correct answer was: ${correct}`;
+            }
+
+            document.getElementById("score-display").innerText = `Score: ${totalScore} pts`;
+
+            fetch(`${WEB_APP_URL}?action=submitScore&name=${encodeURIComponent(playerName)}&score=${totalScore}`)
+                .catch(err => console.log("Score updated"));
         }
     </script>
 </body>
