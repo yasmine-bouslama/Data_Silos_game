@@ -1,186 +1,156 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Silo Breaker - Live Challenge</title>
     <style>
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: #0f172a;
-        color: #f8fafc;
-        text-align: center;
-        padding: 20px;
-        margin: 0;
-      }
-      .card {
-        background: #1e293b;
-        max-width: 400px;
-        margin: 40px auto;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-      }
-      input {
-        width: 85%;
-        padding: 12px;
-        margin: 15px 0;
-        border-radius: 6px;
-        border: 1px solid #475569;
-        background: #0f172a;
-        color: #fff;
-        font-size: 16px;
-        text-align: center;
-      }
-      button {
-        background: #3b82f6;
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        font-size: 16px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: bold;
-        width: 100%;
-        transition: background 0.2s;
-      }
-      button:hover {
-        background: #2563eb;
-      }
-      .game-btn {
-        background: #334155;
-        margin-top: 10px;
-        border: 1px solid #475569;
-      }
-      .game-btn:hover {
-        background: #475569;
-      }
-      .hidden {
-        display: none;
-      }
-      #timer {
-        font-size: 28px;
-        font-weight: bold;
-        color: #38bdf8;
-        margin: 10px 0 20px 0;
-      }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f8fafc; text-align: center; padding: 20px; margin: 0; }
+        .card { background: #1e293b; max-width: 500px; margin: 40px auto; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        input { width: 85%; padding: 12px; margin: 15px 0; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 16px; text-align: center; }
+        button { background: #3b82f6; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: background 0.2s; }
+        button:hover { background: #2563eb; }
+        .option-btn { background: #334155; margin-top: 10px; border: 1px solid #475569; text-align: left; padding: 14px; }
+        .option-btn:hover { background: #475569; }
+        .hidden { display: none; }
+        #timer { font-size: 24px; font-weight: bold; color: #38bdf8; margin: 5px 0 15px 0; }
+        .question-text { font-size: 17px; margin-bottom: 20px; text-align: left; line-height: 1.4; }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <div class="card" id="login-screen">
-      <h2>🚀 Silo Breaker Challenge</h2>
-      <p>Enter your name to join the race and win the professor's bonus!</p>
-      <input
-        type="text"
-        id="playerName"
-        placeholder="Your Name or Student ID"
-        required
-      /><br />
-      <button onclick="startGame()">Start Challenge</button>
+        <h2>🚀 Silo Breaker Challenge</h2>
+        <p>Enter your name to join the race and win the professor's bonus!</p>
+        <input type="text" id="playerName" placeholder="Your Name or Student ID" required><br>
+        <button onclick="startGame()">Start Challenge</button>
     </div>
 
     <div class="card hidden" id="game-screen">
-      <h3>Unblock the Pipeline!</h3>
-      <p style="color: #94a3b8; font-size: 14px">
-        Tap the components in the correct data-flow order:
-      </p>
-      <div id="timer">0.0s</div>
-      <div
-        id="buttons-container"
-        style="display: flex; flex-direction: column; gap: 10px"
-      ></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; color: #94a3b8; font-size: 14px;">
+            <span id="question-progress">Question 1/6</span>
+            <span id="timer">0.0s</span>
+        </div>
+        <div class="question-text" id="question-title">Loading question...</div>
+        <div id="options-container" style="display:flex; flex-direction:column; gap:8px;"></div>
     </div>
 
     <div class="card hidden" id="success-screen">
-      <h2>🎉 Finished!</h2>
-      <p>
-        Your Time:
-        <span
-          id="finalTime"
-          style="color: #4ade80; font-size: 24px; font-weight: bold"
-        ></span>
-        seconds
-      </p>
-      <p style="color: #94a3b8; font-size: 14px">
-        Look up at the main projector screen to see if you secured 1st place!
-      </p>
+        <h2>🎉 Finished!</h2>
+        <p>Your Total Time: <span id="finalTime" style="color: #4ade80; font-size: 24px; font-weight: bold;"></span> seconds</p>
+        <p style="color: #94a3b8; font-size: 14px;">Look up at the main projector screen to see if you secured 1st place!</p>
     </div>
 
     <script>
-      const WEB_APP_URL =
-        "https://script.google.com/macros/s/AKfycbxXHJNcc8iwJdOA9ZtvWzufRgKUlEGn8lDq3LodfLymuwgtqKGNjXxx1zWzVlmQBNeeOA/exec";
+        // REPLACE THIS with your deployed Google Apps Script Web App URL
+        const WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+        
+        let playerName = "";
+        let startTime, timerInterval;
+        let currentQuestionIndex = 0;
 
-      let playerName = "";
-      let startTime, timerInterval;
-      let correctSequence = [
-        "1. Isolated Legacy DB",
-        "2. Fragmented Department CRM",
-        "3. Unified Virtualization Layer",
-      ];
-      let currentStep = 0;
+        const questions = [
+            {
+                question: "1. Imagine a hospital where the emergency room uses a completely different software system than the pharmacy, and neither can see the other's notes. What is the classic term for this frustrating operational setup?",
+                options: ["Data silos", "Cloud redundancy", "Open-source tracking", "Distributed networking"],
+                correct: "Data silos"
+            },
+            {
+                question: "2. A retail company's marketing team sends an email promotion for winter coats to a customer who bought those exact coats yesterday in a physical store. What underlying problem does this embarrassing mistake highlight?",
+                options: ["Slow internet bandwidth", "Disconnected customer data across sales channels", "Outdated hardware servers", "Overstaffed marketing department"],
+                correct: "Disconnected customer data across sales channels"
+            },
+            {
+                question: "3. Why do companies often struggle to break down data silos even when everyone agrees they are a bad idea?",
+                options: ["Lack of electricity", "Departmental politics and legacy software systems", "Too many data storage options", "Cloud service fees"],
+                correct: "Departmental politics and legacy software systems"
+            },
+            {
+                question: "4. If an organization wants to fix its data silos by giving everyone a single, trusted source of truth for all analytical reporting, which common tool do they usually build?",
+                options: ["A centralized data warehouse", "A social media feed", "An internal messaging app", "A local spreadsheet"],
+                correct: "A centralized data warehouse"
+            },
+            {
+                question: "5. What is a major hidden danger of employees creating their own informal, private spreadsheets to bypass rigid company data silos?",
+                options: ["Faster network speeds", "Creation of 'shadow data' with no security or accuracy checks", "Improved team morale", "Automatic software updates"],
+                correct: "Creation of 'shadow data' with no security or accuracy checks"
+            },
+            {
+                question: "6. How does breaking down data silos directly improve artificial intelligence (AI) and machine learning projects within a company?",
+                options: ["It reduces computer electricity usage", "It speeds up typing speed", "It provides rich, multi-departmental training data for better predictions", "It deletes unnecessary code"],
+                correct: "It provides rich, multi-departmental training data for better predictions"
+            }
+        ];
 
-      function startGame() {
-        playerName = document.getElementById("playerName").value.trim();
-        if (!playerName) {
-          alert("Please enter your name!");
-          return;
+        function startGame() {
+            playerName = document.getElementById("playerName").value.trim();
+            if(!playerName) { alert("Please enter your name!"); return; }
+            
+            document.getElementById("login-screen").classList.add("hidden");
+            document.getElementById("game-screen").classList.remove("hidden");
+            
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                let elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                document.getElementById("timer").innerText = elapsed + "s";
+            }, 100);
+
+            loadQuestion();
         }
 
-        document.getElementById("login-screen").classList.add("hidden");
-        document.getElementById("game-screen").classList.remove("hidden");
+        function loadQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                endGame();
+                return;
+            }
 
-        startTime = Date.now();
-        timerInterval = setInterval(() => {
-          let elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-          document.getElementById("timer").innerText = elapsed + "s";
-        }, 100);
+            let q = questions[currentQuestionIndex];
+            document.getElementById("question-progress").innerText = `Question ${currentQuestionIndex + 1}/${questions.length}`;
+            document.getElementById("question-title").innerText = q.question;
 
-        renderButtons();
-      }
+            let container = document.getElementById("options-container");
+            container.innerHTML = "";
 
-      function renderButtons() {
-        const container = document.getElementById("buttons-container");
-        container.innerHTML = "";
-        let shuffled = [...correctSequence].sort(() => Math.random() - 0.5);
+            // Shuffle options so it's a real challenge
+            let shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
 
-        shuffled.forEach((text) => {
-          let btn = document.createElement("button");
-          btn.innerText = text;
-          btn.className = "game-btn";
-          btn.onclick = () => checkStep(text, btn);
-          container.appendChild(btn);
-        });
-      }
+            shuffledOptions.forEach(optText => {
+                let btn = document.createElement("button");
+                btn.innerText = optText;
+                btn.className = "option-btn";
+                btn.onclick = () => checkAnswer(optText, q.correct, btn);
+                container.appendChild(btn);
+            });
+        }
 
-      function checkStep(selectedText, btn) {
-        if (selectedText === correctSequence[currentStep]) {
-          currentStep++;
-          btn.style.background = "#22c55e";
-          btn.style.borderColor = "#22c55e";
-          btn.disabled = true;
-          if (currentStep === correctSequence.length) {
+        function checkAnswer(selected, correct, btn) {
+            if (selected === correct) {
+                btn.style.background = "#22c55e";
+                btn.style.borderColor = "#22c55e";
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    loadQuestion();
+                }, 300);
+            } else {
+                btn.style.background = "#ef4444";
+                btn.style.borderColor = "#ef4444";
+                setTimeout(() => {
+                    btn.style.background = "#334155";
+                    btn.style.borderColor = "#475569";
+                }, 400);
+            }
+        }
+
+        function endGame() {
             clearInterval(timerInterval);
             let totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
             document.getElementById("finalTime").innerText = totalTime + "s";
             document.getElementById("game-screen").classList.add("hidden");
-            document
-              .getElementById("success-screen")
-              .classList.remove("hidden");
-
+            document.getElementById("success-screen").classList.remove("hidden");
+            
             // Send score to Google Sheets backend
-            fetch(
-              `${WEB_APP_URL}?action=submit&name=${encodeURIComponent(playerName)}&time=${totalTime}`,
-            ).catch((err) => console.log("Score logged"));
-          }
-        } else {
-          btn.style.background = "#ef4444";
-          btn.style.borderColor = "#ef4444";
-          setTimeout(() => {
-            btn.style.background = "#334155";
-            btn.style.borderColor = "#475569";
-          }, 400);
+            fetch(`${WEB_APP_URL}?action=submit&name=${encodeURIComponent(playerName)}&time=${totalTime}`)
+                .catch(err => console.log("Score logged"));
         }
-      }
     </script>
-  </body>
+</body>
 </html>
