@@ -1,0 +1,1258 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      DATA SILOS - Master Presentation & Interactive Course Assessment
+    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-dark: #090d16;
+        --card-bg: rgba(20, 27, 44, 0.65);
+        --accent-purple: #8b5cf6;
+        --accent-cyan: #06b6d4;
+        --accent-amber: #f59e0b;
+        --accent-rose: #f43f5e;
+        --accent-green: #10b981;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --border-subtle: rgba(255, 255, 255, 0.08);
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background-color: var(--bg-dark);
+        color: var(--text-primary);
+        font-family: "Plus Jakarta Sans", sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        overflow-x: hidden;
+        background-image:
+          radial-gradient(
+            circle at 10% 15%,
+            rgba(139, 92, 246, 0.12) 0%,
+            transparent 45%
+          ),
+          radial-gradient(
+            circle at 90% 85%,
+            rgba(6, 182, 212, 0.1) 0%,
+            transparent 45%
+          );
+      }
+      .slide-frame {
+        width: 88vw;
+        max-width: 1100px;
+        height: 640px;
+        background: rgba(13, 18, 30, 0.85);
+        border: 1px solid var(--border-subtle);
+        border-radius: 24px;
+        backdrop-filter: blur(20px);
+        padding: 48px;
+        display: none;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8);
+        position: relative;
+      }
+      .slide-frame.active {
+        display: flex;
+        animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-subtle);
+        padding-bottom: 16px;
+      }
+      .step-pill {
+        background: rgba(139, 92, 246, 0.15);
+        border: 1px solid var(--accent-purple);
+        color: #c084fc;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+      }
+      .quiz-pill {
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid var(--accent-green);
+        color: #6ee7b7;
+      }
+      h1.title-large {
+        font-family: "Syne", sans-serif;
+        font-size: 3.4rem;
+        line-height: 1.1;
+        background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 12px;
+      }
+      h2.slide-heading {
+        font-family: "Syne", sans-serif;
+        font-size: 2.2rem;
+        color: #fff;
+        margin-bottom: 24px;
+      }
+      p.description {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        line-height: 1.7;
+        max-width: 750px;
+      }
+      .speaker-quote {
+        background: rgba(245, 158, 11, 0.08);
+        border-left: 3px solid var(--accent-amber);
+        padding: 12px 18px;
+        border-radius: 0 10px 10px 0;
+        color: #fde68a;
+        font-size: 0.95rem;
+        font-style: italic;
+        margin-bottom: 24px;
+      }
+      .grid-split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+        align-items: center;
+      }
+      .grid-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+      .glass-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        padding: 24px;
+        transition: all 0.3s ease;
+      }
+      .glass-card:hover {
+        border-color: var(--accent-purple);
+        transform: translateY(-4px);
+      }
+      .canvas-box {
+        background: rgba(10, 15, 25, 0.6);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        padding: 10px;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        max-width: 450px;
+        height: 220px;
+      }
+      .video-box {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 2px solid var(--accent-cyan);
+        box-shadow: 0 0 25px rgba(6, 182, 212, 0.25);
+        max-height: 340px;
+      }
+      video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .q-slide-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .question-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1.4;
+      }
+      .question-translation {
+        color: var(--accent-amber);
+        font-size: 0.95rem;
+        font-style: italic;
+        margin-top: 4px;
+      }
+      .options-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .quiz-opt-btn {
+        background: rgba(20, 27, 44, 0.8);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-primary);
+        padding: 16px 20px;
+        border-radius: 12px;
+        font-size: 1.05rem;
+        text-align: left;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .quiz-opt-btn:hover {
+        border-color: var(--accent-cyan);
+        background: rgba(6, 182, 212, 0.1);
+      }
+      .quiz-opt-btn.correct-choice {
+        background: rgba(16, 185, 129, 0.2) !important;
+        border-color: var(--accent-green) !important;
+        color: #6ee7b7 !important;
+        font-weight: 700;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+      }
+      .quiz-opt-btn.wrong-choice {
+        background: rgba(244, 63, 94, 0.2) !important;
+        border-color: var(--accent-rose) !important;
+        color: #fda4af !important;
+      }
+      .explanation-box {
+        display: none;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid var(--accent-green);
+        border-radius: 12px;
+        padding: 16px 20px;
+        color: #a7f3d0;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        animation: fadeIn 0.3s ease;
+      }
+      .bottom-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid var(--border-subtle);
+        padding-top: 18px;
+      }
+      .nav-btn {
+        background: linear-gradient(135deg, var(--accent-purple), #5b21b6);
+        color: #fff;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .nav-btn:hover {
+        transform: scale(1.04);
+        box-shadow: 0 0 18px rgba(139, 92, 246, 0.4);
+      }
+      .slide-counter {
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(15px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SLIDE 1: Title & Authors -->
+    <div class="slide-frame active" id="s1">
+      <div class="top-bar"><span class="step-pill">Introduction</span></div>
+      <div>
+        <h1 class="title-large">DATA SILOS</h1>
+        <p
+          style="
+            color: var(--accent-cyan);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 28px;
+          "
+        >
+          (Cloisonnement des données)
+        </p>
+        <p class="description">
+          A technical exploration into modern enterprise data architectural
+          barriers and virtualization solutions.
+        </p>
+      </div>
+      <div
+        style="border-top: 1px solid var(--border-subtle); padding-top: 20px"
+      >
+        <p
+          style="
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+          "
+        >
+          Presented By
+        </p>
+        <p
+          style="
+            color: #fff;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 4px;
+          "
+        >
+          Yasmine Bouslama & Abderrahmen Mejri
+        </p>
+      </div>
+      <div class="bottom-nav">
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="goNext()">Next Slide →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: The Hook & Scenario -->
+    <div class="slide-frame" id="s2">
+      <div class="top-bar"><span class="step-pill">Introduction</span></div>
+      <div class="grid-split" style="grid-template-columns: 1fr">
+        <div>
+          <div class="speaker-quote">
+            "Imagine we are building a system for a large company..."
+          </div>
+          <h2 class="slide-heading" style="margin-bottom: 16px">
+            The Isolated Enterprise
+          </h2>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div class="glass-card" style="padding: 14px 18px">
+              <h3
+                style="
+                  color: var(--accent-purple);
+                  font-size: 1rem;
+                  margin-bottom: 2px;
+                "
+              >
+                Marketing
+              </h3>
+              <p style="color: var(--text-secondary); font-size: 0.85rem">
+                Manages customer profiles & engagement data.
+              </p>
+            </div>
+            <div class="glass-card" style="padding: 14px 18px">
+              <h3
+                style="
+                  color: var(--accent-cyan);
+                  font-size: 1rem;
+                  margin-bottom: 2px;
+                "
+              >
+                Finance
+              </h3>
+              <p style="color: var(--text-secondary); font-size: 0.85rem">
+                Handles payments, invoices, and accounting logs.
+              </p>
+            </div>
+            <div class="glass-card" style="padding: 14px 18px">
+              <h3
+                style="
+                  color: var(--accent-amber);
+                  font-size: 1rem;
+                  margin-bottom: 2px;
+                "
+              >
+                Management
+              </h3>
+              <p style="color: var(--text-secondary); font-size: 0.85rem">
+                Demands a unified dashboard for overall profitability.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goPrev()">← Back</button>
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="goNext()">Next Slide →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Video Demonstration -->
+    <div class="slide-frame" id="s3">
+      <div class="top-bar"><span class="step-pill">Video Overview</span></div>
+      <div class="grid-split">
+        <div>
+          <h2 class="slide-heading">Visualizing Data Silos</h2>
+          <p class="description" style="margin-bottom: 20px">
+            In enterprise architecture, data silos aren't just organizational
+            boundaries—they form physical and technical barriers that isolate
+            information.
+          </p>
+          <div class="speaker-quote">
+            "Let's look at a quick architecture case study..."
+          </div>
+        </div>
+        <div class="video-box">
+          <video controls autoplay loop muted preload="auto">
+            <source
+              src="Woman_facing_corporate_data_silos_20261001155751.mp4"
+              type="video/mp4"
+            />
+            Your browser does not support video playback.
+          </video>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goPrev()">← Back</button>
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="goNext()">Next Slide →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: The Technical Trap -->
+    <div class="slide-frame" id="s4">
+      <div class="top-bar">
+        <span class="step-pill">Technical Breakdown</span>
+      </div>
+      <div>
+        <h2 class="slide-heading">The Dashboard Scenario</h2>
+        <div class="grid-split">
+          <div
+            class="glass-card"
+            style="border-left: 4px solid var(--accent-purple)"
+          >
+            <h3 style="color: #fff; margin-bottom: 10px">Sales Module</h3>
+            <p style="color: var(--text-secondary)">
+              • Relational Database: <strong>PostgreSQL</strong><br />
+              • Timezone Format: <strong>UTC Time</strong>
+            </p>
+          </div>
+          <div
+            class="glass-card"
+            style="border-left: 4px solid var(--accent-cyan)"
+          >
+            <h3 style="color: #fff; margin-bottom: 10px">Logistics Module</h3>
+            <p style="color: var(--text-secondary)">
+              • NoSQL Database: <strong>MongoDB</strong><br />
+              • Timezone Format: <strong>Local Time</strong>
+            </p>
+          </div>
+        </div>
+        <div
+          class="glass-card"
+          style="margin-top: 20px; border-color: var(--accent-rose)"
+        >
+          <p
+            style="
+              color: var(--accent-rose);
+              font-weight: 700;
+              margin-bottom: 6px;
+            "
+          >
+            ⚠️ The Big Technical Trap
+          </p>
+          <p style="color: var(--text-secondary)">
+            Incompatible schemas (Structured Relational vs Flexible JSON) +
+            Mismatched Timezone Stamps = Dashboard spits out incoherent numbers!
+          </p>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goPrev()">← Back</button>
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="goNext()">Next Slide →</button>
+      </div>
+    </div>
+
+    <!-- NEW SLIDE 5: Silo Animation -->
+    <div class="slide-frame" id="s-silo">
+      <div class="top-bar"><span class="step-pill">Visual Overview</span></div>
+      <div style="text-align: center">
+        <h2 class="slide-heading" style="margin-bottom: 16px">
+          Isolated Systems, No Bridges
+        </h2>
+        <div class="canvas-box">
+          <canvas
+            id="siloCanvas"
+            width="450"
+            height="220"
+            style="max-width: 640px; height: auto"
+          ></canvas>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goPrev()">← Back</button>
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="goNext()">Next Slide →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Interactive Audience Pause -->
+    <div class="slide-frame" id="s5">
+      <div class="top-bar">
+        <span class="step-pill">Interactive Challenge</span>
+      </div>
+      <div style="text-align: center; max-width: 800px; margin: 0 auto">
+        <h2
+          class="slide-heading"
+          style="font-size: 2.5rem; line-height: 1.3; margin-bottom: 24px"
+        >
+          "Without migrating everything into a single massive data warehouse,
+          how would you reconcile these sources in real-time?"
+        </h2>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goPrev()">← Back</button>
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="goNext()">Next Slide →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Classic Solution Failures (Part 1) -->
+    <div class="slide-frame" id="s6">
+      <div class="top-bar"><span class="step-pill">Debriefing</span></div>
+      <div>
+        <h2 class="slide-heading">Limits of Classic Solution #1: APIs</h2>
+        <div
+          class="glass-card"
+          style="border-left: 4px solid var(--accent-rose); margin-bottom: 20px"
+        >
+          <h3 style="color: var(--accent-rose); margin-bottom: 10px">
+            The API Wall
+          </h3>
+          <p class="description">
+            Relying purely on custom APIs causes developers to repeatedly hit
+            the wall of incompatible schemas. PostgreSQL tables do not map
+            cleanly to MongoDB's unstructured JSON without heavy custom
+            conversion scripts that require ongoing maintenance.
+          </p>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goPrev()">← Back</button>
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="goNext()">Next Slide →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: Classic Solution Failures (Part 2) -->
+    <div class="slide-frame" id="s7">
+      <div class="top-bar"><span class="step-pill">Debriefing</span></div>
+      <div>
+        <h2 class="slide-heading">
+          Limits of Classic Solution #2: Centralization
+        </h2>
+        <div
+          class="glass-card"
+          style="border-left: 4px solid var(--accent-amber)"
+        >
+          <h3 style="color: var(--accent-amber); margin-bottom: 10px">
+            The Data Warehouse Monster
+          </h3>
+          <p class="description" style="margin-bottom: 16px">
+            Copying everything into a single central warehouse creates major
+            technical debt:
+          </p>
+          <ul
+            style="
+              color: var(--text-secondary);
+              line-height: 1.8;
+              margin-left: 20px;
+            "
+          >
+            <li>💰 High storage & pipeline costs</li>
+            <li>💥 Sync scripts breaking frequently</li>
+            <li>⏳ Data becomes outdated immediately after copying</li>
+          </ul>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goPrev()">← Back</button>
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="goNext()">Next Slide →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: The Solution: Data Virtualization -->
+    <div class="slide-frame" id="s8">
+      <div class="top-bar"><span class="step-pill">Solution</span></div>
+      <div>
+        <h2 class="slide-heading" style="color: var(--accent-cyan)">
+          Data Virtualization
+        </h2>
+        <div
+          class="glass-card"
+          style="
+            background: rgba(6, 182, 212, 0.08);
+            border-color: var(--accent-cyan);
+            margin-bottom: 24px;
+          "
+        >
+          <p
+            style="
+              color: var(--accent-cyan);
+              font-size: 1.3rem;
+              font-weight: 700;
+            "
+          >
+            "Simple: We stop moving data around."
+          </p>
+          <p style="color: var(--text-secondary); margin-top: 8px">
+            Instead of copying data or altering source databases, virtualization
+            builds a logical abstraction layer directly over PostgreSQL and
+            MongoDB.
+          </p>
+        </div>
+        <div class="grid-cards">
+          <div class="glass-card">
+            <h4 style="color: #fff; margin-bottom: 6px">
+              1. Schema Resolution
+            </h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem">
+              Translates JSON & Tables dynamically on the fly.
+            </p>
+          </div>
+          <div class="glass-card">
+            <h4 style="color: #fff; margin-bottom: 6px">2. Real-Time Sync</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem">
+              Normalizes UTC vs Local time during query execution.
+            </p>
+          </div>
+          <div class="glass-card">
+            <h4 style="color: #fff; margin-bottom: 6px">3. Unified View</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem">
+              Delivers clean results in ms without touching original source
+              files.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goPrev()">← Back</button>
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="goNext()">Next Slide →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: Flash Quiz -->
+    <div class="slide-frame" id="s9">
+      <div class="top-bar"><span class="step-pill">Flash Quiz</span></div>
+      <div>
+        <h2 class="slide-heading">Interactive Flash Quiz</h2>
+        <div
+          class="glass-card"
+          style="margin-top: 16px; cursor: pointer"
+          onclick="toggleAns(1)"
+        >
+          <p style="color: #fff; font-weight: 600">
+            ❓ Q1: True or False? Data virtualization physically moves and
+            copies all data into a central database?
+          </p>
+          <div
+            class="quiz-answer"
+            id="a1"
+            style="
+              display: none;
+              margin-top: 12px;
+              padding-top: 12px;
+              border-top: 1px dashed rgba(255, 255, 255, 0.15);
+              color: #4ade80;
+              font-weight: 600;
+            "
+          >
+            ❌ FALSE! Virtualization leaves data in place and creates a
+            real-time logical view.
+          </div>
+        </div>
+        <div
+          class="glass-card"
+          style="margin-top: 16px; cursor: pointer"
+          onclick="toggleAns(2)"
+        >
+          <p style="color: #fff; font-weight: 600">
+            ❓ Q2: What is the main roadblock when linking disparate sources
+            without virtualization?
+          </p>
+          <div
+            class="quiz-answer"
+            id="a2"
+            style="
+              display: none;
+              margin-top: 12px;
+              padding-top: 12px;
+              border-top: 1px dashed rgba(255, 255, 255, 0.15);
+              color: #4ade80;
+              font-weight: 600;
+            "
+          >
+            ⚠️ The Incompatible Schema Barrier (plus mismatching date/timezone
+            formats).
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goPrev()">← Back</button>
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="goNext()">Next Slide →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: Conclusion & Q&A -->
+    <div class="slide-frame" id="s10">
+      <div class="top-bar"><span class="step-pill">Conclusion</span></div>
+      <div style="text-align: center; max-width: 800px; margin: 0 auto">
+        <h2
+          class="slide-heading"
+          style="font-size: 2.6rem; margin-bottom: 20px"
+        >
+          "Data silos build technical walls;<br />Data virtualization builds
+          logical bridges."
+        </h2>
+        <p
+          style="
+            color: var(--accent-cyan);
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+          "
+        >
+          Thank you for listening!
+        </p>
+        <div
+          style="
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            padding: 18px 30px;
+            border-radius: 14px;
+            display: inline-block;
+          "
+        >
+          <p style="color: #fff; font-size: 1.1rem; font-weight: 600">
+            💬 Floor is now open for Q&A!
+          </p>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goPrev()">← Back</button>
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="goNext()">
+          Start Assessment Quiz →
+        </button>
+      </div>
+    </div>
+
+    <!-- SLIDE 12: Question 1 -->
+    <div class="slide-frame" id="s11">
+      <div class="top-bar">
+        <span class="step-pill quiz-pill">Question 1 / 6</span>
+      </div>
+      <div class="q-slide-container">
+        <div>
+          <div class="question-title">
+            1. Imagine a hospital where the emergency room uses a completely
+            different software system than the pharmacy, and neither can see the
+            other's notes. What is the classic term for this frustrating
+            operational setup?
+          </div>
+          <div class="question-translation">
+            🇫🇷 Traduction: Imaginez un hôpital où les urgences utilisent un
+            système complètement différent de la pharmacie. Quel est le terme
+            classique pour cette organisation cloisonnée?
+          </div>
+        </div>
+        <div class="options-list">
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, true, 'exp1')"
+          >
+            <span>A. Data silos</span>
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp1')"
+          >
+            <span>B. Cloud redundancy</span>
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp1')"
+          >
+            <span>C. Open-source tracking</span>
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp1')"
+          >
+            <span>D. Distributed networking</span>
+          </button>
+        </div>
+        <div class="explanation-box" id="exp1">
+          <strong> Explanation / Explication:</strong><br />
+          <strong>Data silos (Cloisonnement des données)</strong> occurs when
+          information systems are completely isolated from each other.
+          (Explication: Le terme "Silo de données" désigne des systèmes
+          d'information isolés qui ne communiquent pas entre eux).
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goPrev()">← Back</button>
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="goNext()">Next Question →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 13: Question 2 -->
+    <div class="slide-frame" id="s12">
+      <div class="top-bar">
+        <span class="step-pill quiz-pill">Question 2 / 6</span>
+      </div>
+      <div class="q-slide-container">
+        <div>
+          <div class="question-title">
+            2. A retail company's marketing team sends an email promotion for
+            winter coats to a customer who bought those exact coats yesterday in
+            a physical store. What underlying problem does this embarrassing
+            mistake highlight?
+          </div>
+          <div class="question-translation">
+            🇫🇷 Traduction: Une équipe marketing envoie une promotion pour un
+            manteau à un client qui l'a déjà acheté hier en magasin physique.
+            Quel problème cela souligne-t-il?
+          </div>
+        </div>
+        <div class="options-list">
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp2')"
+          >
+            <span>A. Slow internet bandwidth</span>
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, true, 'exp2')"
+          >
+            <span>B. Disconnected customer data across sales channels</span>
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp2')"
+          >
+            <span>C. Outdated hardware servers</span>
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp2')"
+          >
+            <span>D. Overstaffed marketing department</span>
+          </button>
+        </div>
+        <div class="explanation-box" id="exp2">
+          <strong> Explanation / Explication:</strong><br />
+          <strong>Disconnected customer data across sales channels</strong>:
+          Physical store transactions (POS) are not synced with the online
+          e-mail system. (Explication: Les données de caisse en magasin et la
+          base e-mailing ne sont pas synchronisées en temps réel).
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goPrev()">← Back</button>
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="goNext()">Next Question →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 14: Question 3 -->
+    <div class="slide-frame" id="s13">
+      <div class="top-bar">
+        <span class="step-pill quiz-pill">Question 3 / 6</span>
+      </div>
+      <div class="q-slide-container">
+        <div>
+          <div class="question-title">
+            3. Why do companies often struggle to break down data silos even
+            when everyone agrees they are a bad idea?
+          </div>
+          <div class="question-translation">
+            🇫🇷 Traduction: Pourquoi les entreprises ont-elles du mal à éliminer
+            les silos de données même quand tout le monde est d'accord sur leur
+            danger?
+          </div>
+        </div>
+        <div class="options-list">
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp3')"
+          >
+            <span>A. Lack of electricity</span>
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, true, 'exp3')"
+          >
+            <span>B. Departmental politics and legacy software systems</span>
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp3')"
+          >
+            <span>C. Too many data storage options</span>
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp3')"
+          >
+            <span>D. Cloud service fees</span>
+          </button>
+        </div>
+        <div class="explanation-box" id="exp3">
+          <strong> Explanation / Explication:</strong><br />
+          <strong>Departmental politics and legacy software systems</strong>:
+          Departments guard their data, and old software systems are technically
+          difficult to connect. (Explication: Rivalités politiques internes et
+          difficultés d'intégration des anciens systèmes logiciels hérités).
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goPrev()">← Back</button>
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="goNext()">Next Question →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 15: Question 4 -->
+    <div class="slide-frame" id="s14">
+      <div class="top-bar">
+        <span class="step-pill quiz-pill">Question 4 / 6</span>
+      </div>
+      <div class="q-slide-container">
+        <div>
+          <div class="question-title">
+            4. If an organization wants to fix its data silos by giving everyone
+            a single, trusted source of truth for all analytical reporting,
+            which common tool do they usually build?
+          </div>
+          <div class="question-translation">
+            🇫🇷 Traduction: Si une entreprise veut résoudre ses silos en offrant
+            une source unique et fiable pour le reporting, quel outil classique
+            construit-elle?
+          </div>
+        </div>
+        <div class="options-list">
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, true, 'exp4')"
+          >
+            <span>A. A centralized data warehouse</span>
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp4')"
+          >
+            <span>B. A social media feed</span>
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp4')"
+          >
+            <span>C. An internal messaging app</span>
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp4')"
+          >
+            <span>D. A local spreadsheet</span>
+          </button>
+        </div>
+        <div class="explanation-box" id="exp4">
+          <strong> Explanation / Explication:</strong><br />
+          <strong
+            >Centralized Data Warehouse (Entrepôt de données centralisé)</strong
+          >
+          aggregates heterogeneous data sources into one single repository.
+          (Explication: Un entrepôt de données centralise toutes les
+          informations pour servir de source unique de vérité).
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goPrev()">← Back</button>
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="goNext()">Next Question →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 16: Question 5 -->
+    <div class="slide-frame" id="s15">
+      <div class="top-bar">
+        <span class="step-pill quiz-pill">Question 5 / 6</span>
+      </div>
+      <div class="q-slide-container">
+        <div>
+          <div class="question-title">
+            5. What is a major hidden danger of employees creating their own
+            informal, private spreadsheets to bypass rigid company data silos?
+          </div>
+          <div class="question-translation">
+            🇫🇷 Traduction: Quel est le grand danger caché quand des employés
+            créent leurs propres fichiers Excel informels pour contourner les
+            silos?
+          </div>
+        </div>
+        <div class="options-list">
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp5')"
+          >
+            <span>A. Faster network speeds</span>
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, true, 'exp5')"
+          >
+            <span
+              >B. Creation of 'shadow data' with no security or accuracy
+              checks</span
+            >
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp5')"
+          >
+            <span>C. Improved team morale</span>
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp5')"
+          >
+            <span>D. Automatic software updates</span>
+          </button>
+        </div>
+        <div class="explanation-box" id="exp5">
+          <strong> Explanation / Explication:</strong><br />
+          <strong>Creation of 'shadow data' (Données fantômes/Shadow IT)</strong
+          >: These spreadsheets escape corporate governance, security controls,
+          and data consistency checks. (Explication: Création de "données de
+          l'ombre" non vérifiées et non sécurisées par l'équipe informatique).
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goPrev()">← Back</button>
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="goNext()">Next Question →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 17: Question 6 -->
+    <div class="slide-frame" id="s16">
+      <div class="top-bar">
+        <span class="step-pill quiz-pill">Question 6 / 6</span>
+      </div>
+      <div class="q-slide-container">
+        <div>
+          <div class="question-title">
+            6. How does breaking down data silos directly improve artificial
+            intelligence (AI) and machine learning projects within a company?
+          </div>
+          <div class="question-translation">
+            🇫🇷 Traduction: Comment l'élimination des silos de données
+            améliore-t-elle directement les projets d'intelligence artificielle
+            (IA) dans une entreprise?
+          </div>
+        </div>
+        <div class="options-list">
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp6')"
+          >
+            <span>A. It reduces computer electricity usage</span>
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp6')"
+          >
+            <span>B. It speeds up typing speed</span>
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, true, 'exp6')"
+          >
+            <span
+              >C. It provides rich, multi-departmental training data for better
+              predictions</span
+            >
+          </button>
+          <button
+            class="quiz-opt-btn"
+            onclick="evaluateChoice(this, false, 'exp6')"
+          >
+            <span>D. It deletes unnecessary code</span>
+          </button>
+        </div>
+        <div class="explanation-box" id="exp6">
+          <strong> Explanation / Explication:</strong><br />
+          <strong>Rich, multi-departmental training data</strong>: AI models
+          require broad cross-functional data inputs to generate accurate
+          analytical predictions. (Explication: L'IA a besoin de jeux de données
+          complets venant de tous les départements pour prédire efficacement).
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="goPrev()">← Back</button>
+        <span class="slide-counter"></span>
+        <button class="nav-btn" onclick="location.reload()">
+          ↺ Restart Presentation
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const frames = Array.from(document.querySelectorAll(".slide-frame"));
+      const total = frames.length; // 17
+      let cur = 1;
+
+      // Automatic "Slide X / N" counters
+      frames.forEach((f, i) => {
+        const c = f.querySelector(".slide-counter");
+        if (c) c.textContent = `Slide ${i + 1} / ${total}`;
+      });
+
+      function updateSlide(n) {
+        frames.forEach((f, i) => f.classList.toggle("active", i === n - 1));
+      }
+
+      function goNext() {
+        if (cur < total) {
+          cur++;
+          updateSlide(cur);
+        }
+      }
+
+      function goPrev() {
+        if (cur > 1) {
+          cur--;
+          updateSlide(cur);
+        }
+      }
+
+      function toggleAns(id) {
+        const el = document.getElementById(`a${id}`);
+        el.style.display = el.style.display === "block" ? "none" : "block";
+      }
+
+      function evaluateChoice(btn, isCorrect, expId) {
+        const buttons = btn.parentElement.querySelectorAll(".quiz-opt-btn");
+        buttons.forEach((b) =>
+          b.classList.remove("correct-choice", "wrong-choice"),
+        );
+        btn.classList.add(isCorrect ? "correct-choice" : "wrong-choice");
+        const exp = document.getElementById(expId);
+        if (exp) exp.style.display = "block";
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " ") goNext();
+        if (e.key === "ArrowLeft") goPrev();
+      });
+
+      // Canvas Data Silo Tech Animation
+      const canvas = document.getElementById("siloCanvas");
+      if (canvas) {
+        const ctx = canvas.getContext("2d");
+        let angle = 0;
+
+        function drawSiloAnimation() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // Background grid lines
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
+          ctx.lineWidth = 1;
+          for (let i = 0; i < canvas.width; i += 30) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, canvas.height);
+            ctx.stroke();
+          }
+          for (let j = 0; j < canvas.height; j += 30) {
+            ctx.beginPath();
+            ctx.moveTo(0, j);
+            ctx.lineTo(canvas.width, j);
+            ctx.stroke();
+          }
+
+          // Isolated silos
+          const silos = [
+            { x: 90, y: 130, color: "#8b5cf6", label: "PostgreSQL" },
+            { x: 225, y: 60, color: "#f59e0b", label: "CRM (Top)" },
+            { x: 360, y: 130, color: "#06b6d4", label: "MongoDB" },
+          ];
+
+          silos.forEach((s, idx) => {
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, 30 + Math.sin(angle + idx) * 4, 0, Math.PI * 2);
+            ctx.strokeStyle = s.color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, 22, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(13, 18, 30, 0.9)";
+            ctx.fill();
+            ctx.strokeStyle = s.color;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "11px Plus Jakarta Sans";
+            ctx.textAlign = "center";
+            ctx.fillText(s.label, s.x, s.y + 45);
+          });
+
+          // Dashed barrier lines showing silos are blocked
+          ctx.strokeStyle = "#f43f5e";
+          ctx.lineWidth = 2;
+          ctx.setLineDash([4, 4]);
+
+          ctx.beginPath();
+          ctx.moveTo(115, 120);
+          ctx.lineTo(195, 75);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(255, 75);
+          ctx.lineTo(335, 120);
+          ctx.stroke();
+
+          ctx.setLineDash([]);
+
+          angle += 0.03;
+          requestAnimationFrame(drawSiloAnimation);
+        }
+        drawSiloAnimation();
+      }
+    </script>
+  </body>
+</html>

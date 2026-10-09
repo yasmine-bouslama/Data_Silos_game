@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Silo Breaker - Live Challenge</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #0f172a;
+        color: #f8fafc;
+        text-align: center;
+        padding: 20px;
+        margin: 0;
+      }
+      .card {
+        background: #1e293b;
+        max-width: 400px;
+        margin: 40px auto;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      }
+      input {
+        width: 85%;
+        padding: 12px;
+        margin: 15px 0;
+        border-radius: 6px;
+        border: 1px solid #475569;
+        background: #0f172a;
+        color: #fff;
+        font-size: 16px;
+        text-align: center;
+      }
+      button {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        width: 100%;
+        transition: background 0.2s;
+      }
+      button:hover {
+        background: #2563eb;
+      }
+      .game-btn {
+        background: #334155;
+        margin-top: 10px;
+        border: 1px solid #475569;
+      }
+      .game-btn:hover {
+        background: #475569;
+      }
+      .hidden {
+        display: none;
+      }
+      #timer {
+        font-size: 28px;
+        font-weight: bold;
+        color: #38bdf8;
+        margin: 10px 0 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card" id="login-screen">
+      <h2>🚀 Silo Breaker Challenge</h2>
+      <p>Enter your name to join the race and win the professor's bonus!</p>
+      <input
+        type="text"
+        id="playerName"
+        placeholder="Your Name or Student ID"
+        required
+      /><br />
+      <button onclick="startGame()">Start Challenge</button>
+    </div>
+
+    <div class="card hidden" id="game-screen">
+      <h3>Unblock the Pipeline!</h3>
+      <p style="color: #94a3b8; font-size: 14px">
+        Tap the components in the correct data-flow order:
+      </p>
+      <div id="timer">0.0s</div>
+      <div
+        id="buttons-container"
+        style="display: flex; flex-direction: column; gap: 10px"
+      ></div>
+    </div>
+
+    <div class="card hidden" id="success-screen">
+      <h2>🎉 Finished!</h2>
+      <p>
+        Your Time:
+        <span
+          id="finalTime"
+          style="color: #4ade80; font-size: 24px; font-weight: bold"
+        ></span>
+        seconds
+      </p>
+      <p style="color: #94a3b8; font-size: 14px">
+        Look up at the main projector screen to see if you secured 1st place!
+      </p>
+    </div>
+
+    <script>
+      const WEB_APP_URL =
+        "https://script.google.com/macros/s/AKfycbxXHJNcc8iwJdOA9ZtvWzufRgKUlEGn8lDq3LodfLymuwgtqKGNjXxx1zWzVlmQBNeeOA/exec";
+
+      let playerName = "";
+      let startTime, timerInterval;
+      let correctSequence = [
+        "1. Isolated Legacy DB",
+        "2. Fragmented Department CRM",
+        "3. Unified Virtualization Layer",
+      ];
+      let currentStep = 0;
+
+      function startGame() {
+        playerName = document.getElementById("playerName").value.trim();
+        if (!playerName) {
+          alert("Please enter your name!");
+          return;
+        }
+
+        document.getElementById("login-screen").classList.add("hidden");
+        document.getElementById("game-screen").classList.remove("hidden");
+
+        startTime = Date.now();
+        timerInterval = setInterval(() => {
+          let elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+          document.getElementById("timer").innerText = elapsed + "s";
+        }, 100);
+
+        renderButtons();
+      }
+
+      function renderButtons() {
+        const container = document.getElementById("buttons-container");
+        container.innerHTML = "";
+        let shuffled = [...correctSequence].sort(() => Math.random() - 0.5);
+
+        shuffled.forEach((text) => {
+          let btn = document.createElement("button");
+          btn.innerText = text;
+          btn.className = "game-btn";
+          btn.onclick = () => checkStep(text, btn);
+          container.appendChild(btn);
+        });
+      }
+
+      function checkStep(selectedText, btn) {
+        if (selectedText === correctSequence[currentStep]) {
+          currentStep++;
+          btn.style.background = "#22c55e";
+          btn.style.borderColor = "#22c55e";
+          btn.disabled = true;
+          if (currentStep === correctSequence.length) {
+            clearInterval(timerInterval);
+            let totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
+            document.getElementById("finalTime").innerText = totalTime + "s";
+            document.getElementById("game-screen").classList.add("hidden");
+            document
+              .getElementById("success-screen")
+              .classList.remove("hidden");
+
+            // Send score to Google Sheets backend
+            fetch(
+              `${WEB_APP_URL}?action=submit&name=${encodeURIComponent(playerName)}&time=${totalTime}`,
+            ).catch((err) => console.log("Score logged"));
+          }
+        } else {
+          btn.style.background = "#ef4444";
+          btn.style.borderColor = "#ef4444";
+          setTimeout(() => {
+            btn.style.background = "#334155";
+            btn.style.borderColor = "#475569";
+          }, 400);
+        }
+      }
+    </script>
+  </body>
+</html>

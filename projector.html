@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Projector Leaderboard - Silo Breaker</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #020617;
+        color: #f8fafc;
+        text-align: center;
+        padding: 40px;
+        margin: 0;
+      }
+      h1 {
+        font-size: 42px;
+        color: #38bdf8;
+        margin-bottom: 5px;
+      }
+      .subtitle {
+        font-size: 20px;
+        color: #94a3b8;
+        margin-bottom: 30px;
+      }
+      .leaderboard-box {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #0f172a;
+        padding: 25px;
+        border-radius: 16px;
+        border: 2px solid #1e293b;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 24px;
+      }
+      th,
+      td {
+        padding: 18px;
+        text-align: left;
+        border-bottom: 1px solid #1e293b;
+      }
+      th {
+        color: #64748b;
+        font-size: 18px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      tr:nth-child(1) td {
+        color: #facc15;
+        font-weight: bold;
+        background: rgba(250, 204, 21, 0.08);
+      }
+      .time-badge {
+        font-family: monospace;
+        color: #4ade80;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🏆 LIVE LEADERBOARD: Silo Breaker Challenge</h1>
+    <div class="subtitle">
+      Scan the QR code on the presentation slide to play and secure the bonus!
+    </div>
+
+    <div class="leaderboard-box">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 15%">Rank</th>
+            <th style="width: 55%">Player Name</th>
+            <th style="width: 30%">Clear Time</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-body">
+          <tr>
+            <td colspan="3" style="text-align: center; color: #64748b">
+              Waiting for players to finish...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <script>
+      const WEB_APP_URL =
+        "https://script.google.com/macros/s/AKfycbxXHJNcc8iwJdOA9ZtvWzufRgKUlEGn8lDq3LodfLymuwgtqKGNjXxx1zWzVlmQBNeeOA/exec";
+
+      function fetchLeaderboard() {
+        fetch(`${WEB_APP_URL}?action=leaderboard`)
+          .then((res) => res.json())
+          .then((data) => {
+            let tbody = document.getElementById("leaderboard-body");
+            tbody.innerHTML = "";
+            if (!data || data.length === 0) {
+              tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: #64748b;">No finishes yet. Ready... Set... Go!</td></tr>`;
+              return;
+            }
+            data.forEach((row, index) => {
+              let tr = document.createElement("tr");
+              let rankDisplay = index === 0 ? "👑 #1" : `#${index + 1}`;
+              tr.innerHTML = `<td>${rankDisplay}</td><td>${row.name}</td><td class="time-badge">${row.time}s</td>`;
+              tbody.appendChild(tr);
+            });
+          })
+          .catch((err) => console.error("Error fetching leaderboard", err));
+      }
+
+      // Poll the Google Sheet backend every 2 seconds
+      setInterval(fetchLeaderboard, 2000);
+      fetchLeaderboard();
+    </script>
+  </body>
+</html>
