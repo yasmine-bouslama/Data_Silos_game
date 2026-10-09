@@ -2,118 +2,120 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Projector Leaderboard - Silo Breaker</title>
+    <title>Projector & Host Control - Silo Breaker</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8fafc; color: #0f172a; text-align: center; padding: 30px; margin: 0; }
-        h1 { font-size: 40px; color: #0284c7; margin-bottom: 5px; }
-        .subtitle { font-size: 18px; color: #475569; margin-bottom: 25px; }
-        .leaderboard-box { max-width: 900px; margin: 0 auto; background: #ffffff; padding: 25px; border-radius: 16px; border: 2px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        th { color: #64748b; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #ffffff; color: #1e293b; text-align: center; padding: 20px; margin: 0; }
+        h1 { font-size: 36px; color: #0284c7; margin-bottom: 5px; font-weight: 800; }
         
-        /* Barres de progression pour fond clair */
-        .bar-container {
-            position: relative;
-            background: #f1f5f9;
-            border-radius: 8px;
-            height: 38px;
-            width: 100%;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            border: 1px solid #e2e8f0;
-        }
-        .progress-bar {
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            border-radius: 8px;
-            transition: width 0.6s ease-in-out;
-            opacity: 0.85;
-        }
-        .bar-1 { background: linear-gradient(90deg, #facc15, #fde047); box-shadow: 0 0 12px rgba(250, 204, 21, 0.4); opacity: 1; }
-        .bar-2 { background: linear-gradient(90deg, #38bdf8, #7dd3fc); }
-        .bar-3 { background: linear-gradient(90deg, #4ade80, #86efac); }
-        .bar-other { background: linear-gradient(90deg, #cbd5e1, #e2e8f0); }
+        /* Host Control Panel */
+        .admin-panel { background: #0f172a; color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 25px; display: flex; justify-content: center; gap: 15px; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .admin-panel button { background: #38bdf8; color: #0f172a; border: none; padding: 10px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        .admin-panel button:hover { background: #7dd3fc; }
 
-        .bar-content {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            padding: 0 15px;
-            font-weight: bold;
-            font-size: 18px;
-            color: #0f172a;
-        }
-        .time-text { font-family: monospace; font-size: 19px; color: #0369a1; }
+        .leaderboard-box { max-width: 950px; margin: 0 auto; background: #f8fafc; padding: 30px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 15px 35px rgba(0,0,0,0.06); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 16px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { color: #475569; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .bar-container { position: relative; background: #e2e8f0; border-radius: 12px; height: 44px; width: 100%; overflow: hidden; display: flex; align-items: center; }
+        .progress-bar { position: absolute; left: 0; top: 0; height: 100%; border-radius: 12px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .bar-1 { background: linear-gradient(90deg, #eab308, #facc15); box-shadow: 0 0 15px rgba(234, 179, 8, 0.4); }
+        .bar-2 { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+        .bar-3 { background: linear-gradient(90deg, #16a34a, #4ade80); }
+        .bar-other { background: linear-gradient(90deg, #94a3b8, #cbd5e1); }
+
+        .bar-content { position: relative; z-index: 2; display: flex; justify-content: space-between; width: 100%; padding: 0 18px; font-weight: bold; font-size: 19px; color: #0f172a; }
+        .score-text { font-family: monospace; font-size: 20px; color: #0369a1; }
     </style>
 </head>
 <body>
+
+    <!-- HOST CONTROL PANEL -->
+    <div class="admin-panel">
+        <span>🎮 <b>Host Controls:</b></span>
+        <button onclick="updateGameState('playing', 0)">Start / Q1</button>
+        <button onclick="nextQuestion()">Next Question ➡️</button>
+        <button onclick="updateGameState('finished', 0)" style="background: #ef4444; color: #fff;">End Game 🏁</button>
+        <span id="current-q-indicator" style="margin-left: 15px; color: #38bdf8; font-weight: bold;">Status: Waiting</span>
+    </div>
+
     <h1>🏆 LIVE LEADERBOARD: Silo Breaker Challenge</h1>
-    <div class="subtitle">Classement en direct et progression de la course !</div>
+    <div style="font-size: 18px; color: #64748b; margin-bottom: 25px;">Scan the QR code to participate live!</div>
     
     <div class="leaderboard-box">
         <table>
             <thead>
                 <tr>
-                    <th style="width: 12%;">Rang</th>
-                    <th style="width: 28%;">Joueur</th>
-                    <th style="width: 60%;">Progression de la course</th>
+                    <th style="width: 12%;">Rank</th>
+                    <th style="width: 28%;">Player Name</th>
+                    <th style="width: 60%;">Live Score Progression</th>
                 </tr>
             </thead>
             <tbody id="leaderboard-body">
-                <tr><td colspan="3" style="text-align:center; color: #64748b;">En attente des premiers joueurs...</td></tr>
+                <tr><td colspan="3" style="text-align:center; color: #64748b;">Waiting for scores...</td></tr>
             </tbody>
         </table>
     </div>
 
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxXHJNcc8iwJdOA9ZtvWzufRgKUlEGn8lDq3LodfLymuwgtqKGNjXxx1zWzVlmQBNeeOA/exec";
+        
+        let activeQuestionIndex = 0;
+
+        function updateGameState(status, qIndex) {
+            activeQuestionIndex = qIndex;
+            document.getElementById("current-q-indicator").innerText = `Status: ${status === 'playing' ? 'Question ' + (qIndex + 1) : status}`;
+
+            fetch(`${WEB_APP_URL}?action=setGameState&status=${status}&currentQuestion=${qIndex}`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log("Game state updated");
+                    fetchLeaderboard();
+                });
+        }
+
+        function nextQuestion() {
+            activeQuestionIndex++;
+            if (activeQuestionIndex > 5) activeQuestionIndex = 5; // 6 questions total (0 to 5)
+            updateGameState('playing', activeQuestionIndex);
+        }
 
         function fetchLeaderboard() {
             fetch(`${WEB_APP_URL}?action=leaderboard`)
                 .then(res => res.json())
                 .then(data => {
                     let tbody = document.getElementById("leaderboard-body");
+                    if (!tbody) return;
                     tbody.innerHTML = "";
                     
                     if (!data || data.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: #64748b;">Aucun score pour l'instant. Que le meilleur gagne !</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: #64748b;">No players yet...</td></tr>`;
                         return;
                     }
 
-                    // Filtrer et trier par temps croissant (le plus rapide en premier)
-                    let validData = data.filter(row => row.name && !isNaN(parseFloat(row.time)));
-                    validData.sort((a, b) => parseFloat(a.time) - parseFloat(b.time));
+                    let validData = data.filter(row => row.name && !isNaN(parseFloat(row.score)));
+                    validData.sort((a, b) => parseFloat(b.score) - parseFloat(a.score));
 
                     if (validData.length === 0) return;
 
-                    let bestTime = parseFloat(validData[0].time);
+                    let maxScore = Math.max(...validData.map(r => parseFloat(r.score)), 100);
 
                     validData.forEach((row, index) => {
                         let tr = document.createElement("tr");
                         let rankDisplay = index === 0 ? "👑 #1" : `#${index + 1}`;
-                        let timeVal = parseFloat(row.time);
-
-                        // Calcul de la taille de la barre par rapport au meilleur score
-                        let percentage = Math.max(15, Math.min(100, Math.round((bestTime / timeVal) * 100)));
-                        if (index === 0) percentage = 100;
-
+                        let scoreVal = parseFloat(row.score);
+                        let percentage = Math.max(12, Math.min(100, Math.round((scoreVal / maxScore) * 100)));
                         let barClass = index === 0 ? "bar-1" : (index === 1 ? "bar-2" : (index === 2 ? "bar-3" : "bar-other"));
 
                         tr.innerHTML = `
-                            <td style="font-weight: bold; font-size: 20px; color: ${index === 0 ? '#ca8a04' : '#0f172a'}">${rankDisplay}</td>
-                            <td style="font-weight: bold; font-size: 20px; color: #0f172a;">${row.name}</td>
+                            <td style="font-weight: bold; font-size: 21px; color: ${index === 0 ? '#b45309' : '#1e293b'}">${rankDisplay}</td>
+                            <td style="font-weight: bold; font-size: 21px; color: #1e293b;">${row.name}</td>
                             <td>
                                 <div class="bar-container">
                                     <div class="progress-bar ${barClass}" style="width: ${percentage}%;"></div>
                                     <div class="bar-content">
                                         <span>${row.name}</span>
-                                        <span class="time-text">${timeVal.toFixed(2)}s</span>
+                                        <span class="score-text">${scoreVal} pts</span>
                                     </div>
                                 </div>
                             </td>
@@ -121,7 +123,7 @@
                         tbody.appendChild(tr);
                     });
                 })
-                .catch(err => console.error("Erreur de chargement du classement", err));
+                .catch(err => console.error("Leaderboard fetch error", err));
         }
 
         setInterval(fetchLeaderboard, 2000);
